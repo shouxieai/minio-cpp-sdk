@@ -10,8 +10,8 @@ const char access_key = "Q3AM3UQ867SPQQA43P2F";
 const char secret_key = "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG";
 MinioClient minio(server, access_key, secret_key);
 
-const char file       = "echo.txt";
-minio.upload_file("/test-bucket/echo.txt", file);
+const char local_file = "echo.txt";
+minio.upload_file("/test-bucket/echo.txt", local_file);
 auto data = minio.get_file("/test-bucket/echo.txt");
 ```
 
