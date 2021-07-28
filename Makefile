@@ -6,7 +6,6 @@ cpp_objs := $(subst src/,objs/,$(cpp_objs))
 openssl_path := /data/datav/wuhan/lean/openssl1.1.1j
 curl_path    := /data/datav/wuhan/lean/curl7.77.0-DEV
 
-lean := /data/datav/wuhan/lean
 include_paths := src \
 			$(openssl_path)/include \
 			$(curl_path)/include
