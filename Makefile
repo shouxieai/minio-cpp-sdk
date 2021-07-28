@@ -40,7 +40,7 @@ objs/%.o : src/%.cpp
 	@g++ -c $< -o $@ $(cpp_compile_flags)
 
 run : workspace/pro
-	@cd workspace && ./pro -i demo.h264 -o test.mp4
+	@cd workspace && ./pro
 
 clean :
 	@rm -rf objs workspace/pro
