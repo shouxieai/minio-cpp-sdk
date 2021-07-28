@@ -18,7 +18,7 @@ enum QueryType : int{
     QueryType_Put
 };
 
-struct ReadStream{
+struct HttpClientReadStream{
     string* pdata = nullptr;
     int curosr = 0;
 };
@@ -96,14 +96,14 @@ public:
         return query();
     }
 
-    static size_t tobytes(void *ptr, size_t size, size_t count, void *stream){
+    static size_t write_bytes(void *ptr, size_t size, size_t count, void *stream){
         string* buffer = ((string*)stream);
         buffer->insert(buffer->end(), (char*)ptr, (char*)ptr + size* count);
         return size* count;
     }
 
     static size_t read_bytes(void *ptr, size_t size, size_t count, void *userdata){
-        ReadStream* stream = ((ReadStream*)userdata);
+        HttpClientReadStream* stream = ((HttpClientReadStream*)userdata);
         size_t remain = stream->pdata->size() - stream->curosr;
         size_t copyed_size = min(size * count, remain);
         
@@ -146,7 +146,7 @@ public:
         CURL* curl = curl_easy_init();
         FILE* fput_file_handle = nullptr;
         size_t put_file_size = 0;
-        ReadStream stream_put_body;
+        HttpClientReadStream stream_put_body;
 
         if(type_ == QueryType_PutFile){
 
@@ -176,7 +176,7 @@ public:
 
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
         curl_easy_setopt(curl, CURLOPT_URL, url_.c_str());
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, tobytes);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_bytes);
         curl_easy_setopt(curl, CURLOPT_HEADER, 1);
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &data_);
@@ -213,6 +213,7 @@ public:
             goto err;
         } 
 
+        // do curl query
         {
             curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &state_code_);
             if (!(state_code_ >= 200 && state_code_ < 300)){
@@ -261,17 +262,17 @@ private:
     string url_;
     unordered_map<string, string> params_;
     vector<string> headers_;
-    string data_;
-    int state_code_ = 0;
-    string error_;
-    bool verbose_ = false;
-    int timeout_second_ = 60;
-    QueryType type_;
-    string body_;
-    string put_file_;
     string response_header_string_;
     unordered_map<string, string> response_header_;
     vector<string> response_header_lines_;
+    string data_;
+    string error_;
+    QueryType type_;
+    string body_;
+    string put_file_;
+    int state_code_ = 0;
+    bool verbose_ = false;
+    int timeout_second_ = 60;
 };
 
 shared_ptr<HttpClient> newHttp(const string& url){
