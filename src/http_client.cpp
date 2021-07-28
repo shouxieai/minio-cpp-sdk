@@ -18,6 +18,11 @@ enum QueryType : int{
     QueryType_Put
 };
 
+struct ReadStream{
+    string* pdata = nullptr;
+    int curosr = 0;
+};
+
 class HttpClientImpl : public HttpClient{
 public:
     HttpClientImpl(const string& url){
@@ -97,10 +102,13 @@ public:
         return size* count;
     }
 
-    static size_t read_bytes(void *ptr, size_t size, size_t count, void *stream){
-        string* buffer = ((string*)stream);
-        size_t copyed_size = min(size * count, buffer->size());
-        memcpy(ptr, buffer->data(), copyed_size);
+    static size_t read_bytes(void *ptr, size_t size, size_t count, void *userdata){
+        ReadStream* stream = ((ReadStream*)userdata);
+        size_t remain = stream->pdata->size() - stream->curosr;
+        size_t copyed_size = min(size * count, remain);
+        
+        memcpy(ptr, stream->pdata->data() + stream->curosr, copyed_size);
+        stream->curosr += copyed_size;
         return copyed_size;
     }
 
@@ -133,11 +141,12 @@ public:
         response_header_.clear();
 
         curl_slist* headers = nullptr;
-        struct curl_httppost *formpost = nullptr;
-        volatile struct curl_httppost *lastptr = nullptr;
+        curl_httppost *formpost = nullptr;
+        curl_httppost *lastptr = nullptr;
         CURL* curl = curl_easy_init();
         FILE* fput_file_handle = nullptr;
         size_t put_file_size = 0;
+        ReadStream stream_put_body;
 
         if(type_ == QueryType_PutFile){
 
@@ -179,8 +188,10 @@ public:
             curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body_.data());
             curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)body_.size());
         }else if(type_ == QueryType_PutBody){
+            stream_put_body.pdata  = &body_;
+            stream_put_body.curosr = 0;
             curl_easy_setopt(curl, CURLOPT_PUT, 1);
-            curl_easy_setopt(curl, CURLOPT_INFILE, &body_);
+            curl_easy_setopt(curl, CURLOPT_INFILE, &stream_put_body);
             curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_bytes);
             curl_easy_setopt(curl, CURLOPT_INFILESIZE, (long)body_.size());
         }else if(type_ == QueryType_PutFile){
