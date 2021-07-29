@@ -1,6 +1,7 @@
 #include "minio_client.hpp"
 #include <string.h>
 #include <openssl/hmac.h>
+
 #include "http_client.hpp"
 #include "ilogger.hpp"
 
@@ -143,6 +144,13 @@ bool MinioClient::upload_filedata(
     const string& remote_path,
     const string& filedata
 ){
+    return upload_filedata(remote_path, filedata.data(), filedata.size());
+}
+
+bool MinioClient::upload_filedata(
+    const string& remote_path,
+    const void* file_data, size_t data_size
+){
     const char* content_type = "application/octet-stream";
     auto time = gmtime_now();
     auto signature = minio_hmac_encode(
@@ -154,7 +162,7 @@ bool MinioClient::upload_filedata(
         ->add_header(iLogger::format("Date: %s", time.c_str()))
         ->add_header(iLogger::format("Content-Type: %s", content_type))
         ->add_header(iLogger::format("Authorization: AWS %s:%s", access_key.c_str(), signature.c_str()))
-        ->put_body(filedata);
+        ->put_body(HttpBodyData(file_data, data_size));
 
     if(!success){
         INFOE("post failed: %s\n%s", http->error_message().c_str(), http->response_body().c_str());
@@ -185,7 +193,7 @@ bool MinioClient::make_bucket(const std::string& name){
     return success;
 }
 
-vector<string> MinioClient::get_bucket_list(){
+vector<string> MinioClient::get_bucket_list(bool* pointer_success){
     const char* path = "/";
     const char* content_type = "text/plane";
 
@@ -200,6 +208,9 @@ vector<string> MinioClient::get_bucket_list(){
         ->add_header(iLogger::format("Content-Type: %s", content_type))
         ->add_header(iLogger::format("Authorization: AWS %s:%s", access_key.c_str(), signature.c_str()))
         ->get();
+
+    if(pointer_success)
+        *pointer_success = success;
 
     if(!success){
         INFOE("post failed: %s\n%s", http->error_message().c_str(), http->response_body().c_str());

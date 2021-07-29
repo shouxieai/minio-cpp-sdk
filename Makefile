@@ -3,8 +3,8 @@ cpp_srcs := $(shell find src -name "*.cpp")
 cpp_objs := $(patsubst %.cpp,%.o,$(cpp_srcs))
 cpp_objs := $(subst src/,objs/,$(cpp_objs))
 
-openssl_path := /data/datav/wuhan/lean/openssl1.1.1j
-curl_path    := /data/datav/wuhan/lean/curl7.77.0-DEV
+openssl_path := /data/wuhan/lean/openssl1.1.1j
+curl_path    := /data/wuhan/lean/curl7.77.0-DEV
 
 include_paths := src \
 			$(openssl_path)/include \

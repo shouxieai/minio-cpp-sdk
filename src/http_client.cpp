@@ -9,6 +9,17 @@ extern "C"{
 
 using namespace std;
 
+
+HttpBodyData::HttpBodyData(const std::string& data){
+    this->pdata = data.data();
+    this->size = data.size();
+}
+
+HttpBodyData::HttpBodyData(const void* pdata, size_t size){
+    this->pdata = pdata;
+    this->size = size;
+}
+
 enum QueryType : int{
     QueryType_PostFrom,
     QueryType_PostBody,
@@ -19,7 +30,8 @@ enum QueryType : int{
 };
 
 struct HttpClientReadStream{
-    string* pdata = nullptr;
+    const unsigned char* pdata = nullptr;
+    size_t data_size = 0;
     int curosr = 0;
 };
 
@@ -63,13 +75,13 @@ public:
         return this;
     }
 
-    virtual bool post_body(const std::string& body) override{
+    virtual bool post_body(const HttpBodyData& body) override{
         type_ = QueryType_PostBody;
         body_ = body;
         return query();
     }
 
-    virtual bool put_body(const std::string& body) override{
+    virtual bool put_body(const HttpBodyData& body) override{
         type_ = QueryType_PutBody;
         body_ = body;
         return query();
@@ -104,10 +116,10 @@ public:
 
     static size_t read_bytes(void *ptr, size_t size, size_t count, void *userdata){
         HttpClientReadStream* stream = ((HttpClientReadStream*)userdata);
-        size_t remain = stream->pdata->size() - stream->curosr;
+        size_t remain = stream->data_size - stream->curosr;
         size_t copyed_size = min(size * count, remain);
         
-        memcpy(ptr, stream->pdata->data() + stream->curosr, copyed_size);
+        memcpy(ptr, stream->pdata + stream->curosr, copyed_size);
         stream->curosr += copyed_size;
         return copyed_size;
     }
@@ -185,15 +197,16 @@ public:
 
         if(type_ == QueryType_PostBody){
             curl_easy_setopt(curl, CURLOPT_POST, 1);
-            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body_.data());
-            curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)body_.size());
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body_.pdata);
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)body_.size);
         }else if(type_ == QueryType_PutBody){
-            stream_put_body.pdata  = &body_;
+            stream_put_body.pdata  = static_cast<const unsigned char*>(body_.pdata);
+            stream_put_body.data_size = body_.size;
             stream_put_body.curosr = 0;
             curl_easy_setopt(curl, CURLOPT_PUT, 1);
             curl_easy_setopt(curl, CURLOPT_INFILE, &stream_put_body);
             curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_bytes);
-            curl_easy_setopt(curl, CURLOPT_INFILESIZE, (long)body_.size());
+            curl_easy_setopt(curl, CURLOPT_INFILESIZE, (long)body_.size);
         }else if(type_ == QueryType_PutFile){
             curl_easy_setopt(curl, CURLOPT_PUT, 1);
             curl_easy_setopt(curl, CURLOPT_INFILE, fput_file_handle);
@@ -268,7 +281,7 @@ private:
     string data_;
     string error_;
     QueryType type_;
-    string body_;
+    HttpBodyData body_;
     string put_file_;
     int state_code_ = 0;
     bool verbose_ = false;

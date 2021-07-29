@@ -76,7 +76,7 @@ public:
      * 
      * @return std::vector<std::string> 
      */
-    std::vector<std::string> get_bucket_list();
+    std::vector<std::string> get_bucket_list(bool* pointer_success = nullptr);
 
 
     /**

@@ -4,8 +4,8 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/src/**",
-                "/data/datav/wuhan/lean/openssl1.1.1j/include/**",
-                "/data/datav/wuhan/lean/curl7.77.0-DEV/include/**"
+                "/data/wuhan/lean/openssl1.1.1j/include/**",
+                "/data/wuhan/lean/curl7.77.0-DEV/include/**"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc", 
@@ -16,8 +16,8 @@
             "browse": {
                 "path": [
                     "${workspaceFolder}/src/**",
-                    "/data/datav/wuhan/lean/openssl1.1.1j/include/**",
-                    "/data/datav/wuhan/lean/curl7.77.0-DEV/include/**"
+                    "/data/wuhan/lean/openssl1.1.1j/include/**",
+                    "/data/wuhan/lean/curl7.77.0-DEV/include/**"
                 ],
                 "limitSymbolsToIncludedHeaders": false,
                 "databaseFilename": ""

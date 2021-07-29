@@ -5,6 +5,15 @@
 #include <vector>
 #include <memory>
 
+struct HttpBodyData{
+    HttpBodyData() = default;
+    HttpBodyData(const std::string& data);
+    HttpBodyData(const void* pdata, size_t size);
+
+    const void* pdata = nullptr;
+    size_t size = 0;
+};
+
 class HttpClient{
 public:
     virtual HttpClient* add_header(const std::string& value) = 0;
@@ -12,8 +21,8 @@ public:
     virtual HttpClient* verbose() = 0;
     virtual HttpClient* timeout(int timeout_second) = 0;
     virtual bool post() = 0;
-    virtual bool post_body(const std::string& body) = 0;
-    virtual bool put_body(const std::string& body) = 0;
+    virtual bool post_body(const HttpBodyData& body) = 0;
+    virtual bool put_body(const HttpBodyData& body) = 0;
     virtual bool put_file(const std::string& file) = 0;
     virtual bool get() = 0;
     virtual bool put() = 0;
