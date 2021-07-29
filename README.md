@@ -16,8 +16,8 @@ auto data = minio.get_file("/test-bucket/echo.txt");
 ```
 
 # 使用
-1. 配置openssl，下载并编译
-2. 配置curl，配置具有ssl支持的curl
+1. 配置openssl，下载并编译，例如：https://www.openssl.org/source/old/1.1.1/openssl-1.1.1j.tar.gz
+2. 配置curl，配置具有ssl支持的curl，例如：https://curl.se/download.html
 3. 修改Makefile中的openssl和curl路径，运行`make run`
 ```bash
 cd minio-cpp-sdk
