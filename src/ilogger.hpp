@@ -66,6 +66,10 @@ namespace iLogger{
     bool save_file(const string& file, const vector<uint8_t>& data, bool mk_dirs = true);
 	bool save_file(const string& file, const void* data, size_t length, bool mk_dirs = true);
 
+    // 循环等待，并捕获例如ctrl+c等终止信号，收到信号后循环跳出并返回信号类型
+    // 捕获：SIGINT(2)、SIGQUIT(3)
+    int while_loop();
+
     // 关于logger的api
     const char* level_string(int level);
     void set_logger_save_directory(const string& loggerDirectory);

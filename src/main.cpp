@@ -30,14 +30,14 @@ int main() {
     INFO("===========================test upload=========================");
     const char* local_file       = "echo.txt";
     if(minio.upload_file("/test-bucket/echo.txt", local_file)){
-        INFO("upload %s success", local_file);
+        INFO("upload %s success, size: %d bytes", local_file, iLogger::file_size(local_file));
     }
 
 
     /////////////////////////////////////////////////////////////////
     INFO("===========================test download=========================");
     auto data = minio.get_file("/test-bucket/echo.txt");
-    INFO("download echo.txt, content is: %s", data.c_str());
+    INFO("download echo.txt, content is[%d bytes]: %s", data.size(), data.c_str());
 
 
     /////////////////////////////////////////////////////////////////
@@ -51,6 +51,6 @@ int main() {
     /////////////////////////////////////////////////////////////////
     INFO("===========================test download=========================");
     auto data2 = minio.get_file("/test-bucket/echo-filedata.txt");
-    INFO("download echo-filedata.txt, content is: %s", data2.c_str());
+    INFO("download echo-filedata.txt, content is[%d bytes]: %s", data2.size(), data2.c_str());
     return 0;
 }
