@@ -64,6 +64,7 @@ namespace iLogger{
 
     string align_blank(const string& input, int align_size, char blank=' ');
     bool save_file(const string& file, const vector<uint8_t>& data, bool mk_dirs = true);
+    bool save_file(const string& file, const string& data, bool mk_dirs = true);
 	bool save_file(const string& file, const void* data, size_t length, bool mk_dirs = true);
 
     // 循环等待，并捕获例如ctrl+c等终止信号，收到信号后循环跳出并返回信号类型

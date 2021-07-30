@@ -901,6 +901,10 @@ namespace iLogger{
         return true;
     }
 
+    bool save_file(const string& file, const string& data, bool mk_dirs){
+        return save_file(file, data.data(), data.size(), mk_dirs);
+    }
+
     bool save_file(const string& file, const vector<uint8_t>& data, bool mk_dirs){
         return save_file(file, data.data(), data.size(), mk_dirs);
     }
