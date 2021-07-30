@@ -78,6 +78,9 @@ namespace iLogger{
     void set_log_level(int level);
     void __log_func(const char* file, int line, int level, const char* fmt, ...);
     void destroy_logger();
+
+    string base64_decode(const string& base64);
+    string base64_encode(const void* data, size_t size);
 };
 
 

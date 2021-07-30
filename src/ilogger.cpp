@@ -922,4 +922,116 @@ namespace iLogger{
         INFO("Loop over.");
         return g_signum;
     }
+
+
+    static unsigned char from_b64(unsigned char ch) {
+        /* Inverse lookup map */
+        static const unsigned char tab[128] = {
+            255, 255, 255, 255,
+            255, 255, 255, 255, /*  0 */
+            255, 255, 255, 255,
+            255, 255, 255, 255, /*  8 */
+            255, 255, 255, 255,
+            255, 255, 255, 255, /*  16 */
+            255, 255, 255, 255,
+            255, 255, 255, 255, /*  24 */
+            255, 255, 255, 255,
+            255, 255, 255, 255, /*  32 */
+            255, 255, 255, 62,
+            255, 255, 255, 63, /*  40 */
+            52,  53,  54,  55,
+            56,  57,  58,  59, /*  48 */
+            60,  61,  255, 255,
+            255, 200, 255, 255, /*  56   '=' is 200, on index 61 */
+            255, 0,   1,   2,
+            3,   4,   5,   6, /*  64 */
+            7,   8,   9,   10,
+            11,  12,  13,  14, /*  72 */
+            15,  16,  17,  18,
+            19,  20,  21,  22, /*  80 */
+            23,  24,  25,  255,
+            255, 255, 255, 255, /*  88 */
+            255, 26,  27,  28,
+            29,  30,  31,  32, /*  96 */
+            33,  34,  35,  36,
+            37,  38,  39,  40, /*  104 */
+            41,  42,  43,  44,
+            45,  46,  47,  48, /*  112 */
+            49,  50,  51,  255,
+            255, 255, 255, 255, /*  120 */
+        };
+        return tab[ch & 127];
+    }
+
+    string base64_decode(const string& base64) {
+
+        if(base64.empty())
+            return "";
+
+        int len = base64.size();
+        auto s = (const unsigned char*)base64.data();
+        unsigned char a, b, c, d;
+        int orig_len = len;
+        int dec_len = 0;
+        string out_data;
+
+        auto end_s = s + base64.size();
+        int count_eq = 0;
+        while(*--end_s == '='){
+            count_eq ++;
+        }
+        out_data.resize(len / 4 * 3 - count_eq);
+
+        char *dst = const_cast<char*>(out_data.data());
+        char *orig_dst = dst;
+        while (len >= 4 && (a = from_b64(s[0])) != 255 &&
+                (b = from_b64(s[1])) != 255 && (c = from_b64(s[2])) != 255 &&
+                (d = from_b64(s[3])) != 255) {
+            s += 4;
+            len -= 4;
+            if (a == 200 || b == 200) break; /* '=' can't be there */
+            *dst++ = a << 2 | b >> 4;
+            if (c == 200) break;
+            *dst++ = b << 4 | c >> 2;
+            if (d == 200) break;
+            *dst++ = c << 6 | d;
+        }
+        dec_len = (dst - orig_dst);
+
+        // dec_len必定等于out_data.size()
+        return out_data;
+    }
+
+    string base64_encode(const void* data, size_t size) {
+
+        string encode_result;
+        encode_result.reserve(size / 3 * 4 + (size % 3 != 0 ? 4 : 0));
+
+        const unsigned char * current = static_cast<const unsigned char*>(data);
+        static const char *base64_table = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";  
+        while(size > 2) {
+            encode_result += base64_table[current[0] >> 2];
+            encode_result += base64_table[((current[0] & 0x03) << 4) + (current[1] >> 4)];
+            encode_result += base64_table[((current[1] & 0x0f) << 2) + (current[2] >> 6)];
+            encode_result += base64_table[current[2] & 0x3f];
+
+            current += 3;
+            size -= 3;
+        }
+
+        if(size > 0){
+            encode_result += base64_table[current[0] >> 2];
+            if(size%3 == 1) {
+                encode_result += base64_table[(current[0] & 0x03) << 4];
+                encode_result += "==";
+            } else if(size%3 == 2) {
+                encode_result += base64_table[((current[0] & 0x03) << 4) + (current[1] >> 4)];
+                encode_result += base64_table[(current[1] & 0x0f) << 2];
+                encode_result += "=";
+            }
+        }
+        return encode_result;
+    }
+
+
 }; // namespace Logger

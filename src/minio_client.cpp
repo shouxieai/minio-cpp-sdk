@@ -9,32 +9,33 @@ using namespace std;
 
 static string base64_encode(const void* data, size_t size) {
 
-    int num = 0,bin = 0,i;
-    string _encode_result;
-    const unsigned char * current = (unsigned char*)data;
-    const char *_base64_table = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";  
+    string encode_result;
+    encode_result.reserve(size / 3 * 4 + (size % 3 != 0 ? 4 : 0));
+
+    const unsigned char * current = static_cast<const unsigned char*>(data);
+    static const char *base64_table = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";  
     while(size > 2) {
-        _encode_result += _base64_table[current[0] >> 2];
-        _encode_result += _base64_table[((current[0] & 0x03) << 4) + (current[1] >> 4)];
-        _encode_result += _base64_table[((current[1] & 0x0f) << 2) + (current[2] >> 6)];
-        _encode_result += _base64_table[current[2] & 0x3f];
+        encode_result += base64_table[current[0] >> 2];
+        encode_result += base64_table[((current[0] & 0x03) << 4) + (current[1] >> 4)];
+        encode_result += base64_table[((current[1] & 0x0f) << 2) + (current[2] >> 6)];
+        encode_result += base64_table[current[2] & 0x3f];
 
         current += 3;
         size -= 3;
     }
 
     if(size > 0){
-        _encode_result += _base64_table[current[0] >> 2];
+        encode_result += base64_table[current[0] >> 2];
         if(size%3 == 1) {
-            _encode_result += _base64_table[(current[0] & 0x03) << 4];
-            _encode_result += "==";
+            encode_result += base64_table[(current[0] & 0x03) << 4];
+            encode_result += "==";
         } else if(size%3 == 2) {
-            _encode_result += _base64_table[((current[0] & 0x03) << 4) + (current[1] >> 4)];
-            _encode_result += _base64_table[(current[1] & 0x0f) << 2];
-            _encode_result += "=";
+            encode_result += base64_table[((current[0] & 0x03) << 4) + (current[1] >> 4)];
+            encode_result += base64_table[(current[1] & 0x0f) << 2];
+            encode_result += "=";
         }
     }
-    return _encode_result;
+    return encode_result;
 }
 
 // 与date -R 结果一致
