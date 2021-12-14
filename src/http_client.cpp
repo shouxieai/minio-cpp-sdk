@@ -180,7 +180,6 @@ public:
 
         for(auto& value : headers_){
             headers = curl_slist_append(headers, value.c_str());
-            INFO("%s", value.c_str());
         }
 
          if(iLogger::begin_with(url_, "https://")){
