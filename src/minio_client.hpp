@@ -38,7 +38,7 @@ public:
      * @param access_key    指定访问的key，例如：F2IHVVX44WVGYUIA1ESX
      * @param secret_key    指定加密的key，例如：UiJuXEG4V6ZLqCZ9ZbD9lqKEG8WwtaKeA3kh7Lui
      */
-    MinioClient(const std::string& server, const std::string& access_key, const std::string& secret_key);
+    MinioClient(const std::string& server, const std::string& access_key, const std::string& secret_key, int correction_time = 0);
 
 
     /**
@@ -101,6 +101,7 @@ private:
     std::string server;
     std::string access_key;
     std::string secret_key;
+    int correction_time = 0;
 };
 
 #endif // MINIO_CLIENT_HPP

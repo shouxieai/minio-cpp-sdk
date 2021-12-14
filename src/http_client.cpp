@@ -178,8 +178,10 @@ public:
                 CURLFORM_END);
         }
 
-        for(auto& value : headers_)
+        for(auto& value : headers_){
             headers = curl_slist_append(headers, value.c_str());
+            INFO("%s", value.c_str());
+        }
 
          if(iLogger::begin_with(url_, "https://")){
             curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);

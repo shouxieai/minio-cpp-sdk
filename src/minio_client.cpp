@@ -39,9 +39,10 @@ static string base64_encode(const void* data, size_t size) {
 }
 
 // 与date -R 结果一致
-static string gmtime_now(){
+static string gmtime_now(int correction_time){
     time_t timet;
     time(&timet);
+    timet += correction_time;
 
     tm& t = *(tm*)localtime(&timet);
     char timebuffer[100];
@@ -114,8 +115,8 @@ static vector<string> extract_buckets(const string& response){
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-MinioClient::MinioClient(const string& server, const string& access_key, const string& secret_key)
-:server(server), access_key(access_key), secret_key(secret_key)
+MinioClient::MinioClient(const string& server, const string& access_key, const string& secret_key, int correction_time)
+:server(server), access_key(access_key), secret_key(secret_key), correction_time(correction_time)
 {}
 
 bool MinioClient::upload_file(
@@ -123,7 +124,7 @@ bool MinioClient::upload_file(
     const string& file
 ){
     const char* content_type = "application/octet-stream";
-    auto time = gmtime_now();
+    auto time = gmtime_now(correction_time);
     auto signature = minio_hmac_encode(
         secret_key, "PUT", content_type, time, remote_path
     );
@@ -153,7 +154,7 @@ bool MinioClient::upload_filedata(
     const void* file_data, size_t data_size
 ){
     const char* content_type = "application/octet-stream";
-    auto time = gmtime_now();
+    auto time = gmtime_now(correction_time);
     auto signature = minio_hmac_encode(
         secret_key, "PUT", content_type, time, remote_path
     );
@@ -176,7 +177,7 @@ bool MinioClient::make_bucket(const std::string& name){
     string path = "/" + name;
     const char* content_type = "text/plane";
 
-    auto time = gmtime_now();
+    auto time = gmtime_now(correction_time);
     auto signature = minio_hmac_encode(
         secret_key, "PUT", content_type, time, path
     );
@@ -198,7 +199,7 @@ vector<string> MinioClient::get_bucket_list(bool* pointer_success){
     const char* path = "/";
     const char* content_type = "text/plane";
 
-    auto time = gmtime_now();
+    auto time = gmtime_now(correction_time);
     auto signature = minio_hmac_encode(
         secret_key, "GET", content_type, time, path
     );
@@ -224,7 +225,7 @@ string MinioClient::get_file(
     const string& remote_path, bool* pointer_success
 ){
     const char* content_type = "application/octet-stream";
-    auto time = gmtime_now();
+    auto time = gmtime_now(correction_time);
     auto signature = minio_hmac_encode(
         secret_key, "GET", content_type, time, remote_path
     );

@@ -16,6 +16,12 @@ int main() {
     const char* secret_key = "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG";
     MinioClient minio(server, access_key, secret_key);
 
+    // int time_zone_to_gmt   = -8 * 3600;
+    // const char* server     = "https://oss.ceph.com";
+    // const char* access_key = "xxx";
+    // const char* secret_key = "xxxxxx";
+    // MinioClient minio(server, access_key, secret_key, time_zone_to_gmt);
+
 
     /////////////////////////////////////////////////////////////////
     INFO("===========================test get buckets=========================");
@@ -29,28 +35,29 @@ int main() {
     /////////////////////////////////////////////////////////////////
     INFO("===========================test upload=========================");
     const char* local_file       = "echo.txt";
-    if(minio.upload_file("/test-bucket/echo.txt", local_file)){
+    const char* bucket_name      = buckets[0].c_str();
+    if(minio.upload_file(iLogger::format("/%s/echo.txt", bucket_name), local_file)){
         INFO("upload %s success, size: %d bytes", local_file, iLogger::file_size(local_file));
     }
 
 
     /////////////////////////////////////////////////////////////////
     INFO("===========================test download=========================");
-    auto data = minio.get_file("/test-bucket/echo.txt");
+    auto data = minio.get_file(iLogger::format("/%s/echo.txt", bucket_name));
     INFO("download echo.txt, content is[%d bytes]: %s", data.size(), data.c_str());
 
 
     /////////////////////////////////////////////////////////////////
     INFO("===========================test upload data=========================");
     auto filedata = iLogger::load_text_file("echo.txt");
-    if(minio.upload_filedata("/test-bucket/echo-filedata.txt", filedata)){
+    if(minio.upload_filedata(iLogger::format("/%s/echo-filedata.txt", bucket_name), filedata)){
         INFO("upload filedata success, filedata.size = %d", filedata.size());
     }
 
 
     /////////////////////////////////////////////////////////////////
     INFO("===========================test download=========================");
-    auto data2 = minio.get_file("/test-bucket/echo-filedata.txt");
+    auto data2 = minio.get_file(iLogger::format("/%s/echo-filedata.txt", bucket_name));
     INFO("download echo-filedata.txt, content is[%d bytes]: %s", data2.size(), data2.c_str());
     return 0;
 }
